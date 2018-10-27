@@ -1,0 +1,197 @@
+html {
+  background-color: #333333;
+}
+
+.box {
+  position: relative;
+  margin: auto;
+  display: flex;
+  margin-top: 8%;
+  width: 600px;
+  height: 420px;
+  background: none;
+}
+.box .keypad-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 3px;
+  grid-template-rows: 1fr 2fr 1fr;
+  position: relative;
+  margin: auto;
+  width: 70%;
+  height: 95%;
+  border: solid 3px #99CC00;
+  border-radius: 10px;
+}
+.box .keypad-container .upper-sect {
+  background-color: #CCCCCC;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+.box .keypad-container .upper-sect .keypad-screen {
+  font-family: "Press Start 2P", cursive;
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin: 0 auto 0 auto;
+  width: 45%;
+  height: 40%;
+  border-color: #3399ff;
+  border-radius: 10px;
+  border-style: inset;
+  border-width: 2px;
+  background: #6699ff;
+}
+.box .keypad-container .upper-sect .keypad-screen .screen-text {
+  margin: 0 auto 0 auto;
+}
+.box .keypad-container .mid-sect {
+  background-color: #999999;
+  padding: 10px 10px 10px 10px;
+}
+.box .keypad-container .mid-sect .keys-grid {
+  position: relative;
+  margin: auto;
+  width: 90%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-gap: 10px;
+  grid-template-rows: 1fr 1fr 1fr;
+}
+.box .keypad-container .mid-sect .keys-grid .drum-pad-button {
+  display: flex;
+  border-radius: 10px;
+  align-items: center;
+  height: 100%;
+}
+.box .keypad-container .mid-sect .keys-grid .drum-pad-button .drum-pad {
+  line-height: 30px;
+  display: inline-block;
+  cursor: pointer;
+  position: relative;
+  width: 100%;
+}
+.box .keypad-container .footer {
+  background-color: #CCCCCC;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+.box .keypad-container .footer .slidecontainer {
+  margin: 0 auto 0 auto;
+  width: 60%;
+}
+.box .keypad-container .footer .slidecontainer input[type=range] {
+  width: 100%;
+}
+.box .metronome-container {
+  border: solid 3px #99CC00;
+  border-radius: 10px;
+  width: 30%;
+  height: 95%;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 3px;
+  grid-template-rows: 1fr 2fr 1fr;
+}
+.box .metronome-container .upper-sect {
+  background-color: #CCCCCC;
+  display: flex;
+  align-items: center;
+}
+.box .metronome-container .upper-sect .metronome-screen {
+  font-family: "Press Start 2P", cursive;
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin: 0 auto 0 auto;
+  width: 45%;
+  height: 40%;
+  border-color: #3399ff;
+  border-radius: 10px;
+  border-style: inset;
+  border-width: 2px;
+  background: #6699ff;
+}
+.box .metronome-container .upper-sect .metronome-screen .screen-text {
+  margin: 0 auto 0 auto;
+}
+.box .metronome-container .mid-sect {
+  background-color: #999999;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+.box .metronome-container .mid-sect .metronome-controls {
+  display: inline-block;
+  height: 60%;
+  margin: 0 auto 0 auto;
+  width: 80%;
+}
+.box .metronome-container .mid-sect .metronome-controls #button-center {
+  height: 100%;
+  width: 40%;
+}
+.box .metronome-container .mid-sect .metronome-controls #button-left {
+  width: 15%;
+  height: 100%;
+}
+.box .metronome-container .mid-sect .metronome-controls #button-double-left {
+  width: 15%;
+  height: 100%;
+}
+.box .metronome-container .mid-sect .metronome-controls #button-right {
+  width: 15%;
+  height: 100%;
+}
+.box .metronome-container .mid-sect .metronome-controls #button-double-right {
+  width: 15%;
+  height: 100%;
+}
+.box .metronome-container .footer {
+  background-color: #CCCCCC;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+.box .metronome-container .footer .slidecontainer {
+  width: 60%;
+  margin: 0 auto 0 auto;
+}
+.box .metronome-container .footer .slidecontainer #metronome-slider {
+  width: 100%;
+  color: #333333 !important;
+}
+
+@media all and (max-width: 600px) {
+  .box {
+    position: relative;
+    margin: auto;
+    display: block;
+    margin-top: 2%;
+    width: 400px;
+    height: 680px;
+    background: none;
+  }
+  .box .keypad-container {
+    width: 95%;
+    height: 45%;
+  }
+  .box .keypad-container .keypad-screen {
+    font-size: 14px;
+  }
+  .box .metronome-container {
+    width: 95%;
+    height: 45%;
+  }
+}
+
+/*# sourceMappingURL=App.css.map */
