@@ -67,19 +67,143 @@ const db = [
 
 const metronomeClick= "https://sampleswap.org/samples-ghost/DRUMS%20(FULL%20KITS)/kawai%20R50%20drumkit/15[kb]CLICK_3.aif.mp3";
 
+
+
 class App extends Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      looping:false,
+      sequence:[],
+      lastClicksHolder:[],
+      sequenceLoop:[]
+    }
+    this.playSound=this.playSound.bind(this);
+    this.addClick=this.addClick.bind(this);
+    this.activateRecording = this.activateRecording.bind(this);
+    this.addToSequence=this.addToSequence.bind(this);
+    this.playSequence=this.playSequence.bind(this);
+    this.startSequence=this.startSequence.bind(this);
+    this.timerStop=this.timerStop.bind(this);
+  }
+
+  playSound(key){
+    let audio;
+    if(key==='click') {
+      audio = new Audio(metronomeClick);
+    }
+    else {
+     audio = document.getElementById(key);
+    }
+    audio.currentTime = 0;
+    audio.play();
+  }
+
+  startSequence(){
+    if(sequenceLoop.length<3) { // && metronome is active
+    if(!this.state.looping) {
+    this.setState({
+      looping:true
+    })
+    this.index=0;
+    this.playSound(this.state.sequenceLoop[0].key);
+    this.interval=this.state.sequenceLoop[1].timeStamp - this.state.sequenceLoop[0].timeStamp;
+    this.index++;
+    this.expected = Date.now() + this.interval;
+    setTimeout(this.playSequence, this.interval); //if there are patentheis after this.playSequence it fires immediately ignoring timeout
+    }
+  }
+  }
+
+  timerStop() {
+    this.setState({
+      looping:false
+    })
+    clearInterval(this.timerInUse);
+    this.timerInUse=0;
+  }
+
+  playSequence(){
+    this.playSound(this.state.sequenceLoop[this.index].key);
+    let dt = Date.now() - this.expected; 
+
+    if(this.index>this.state.sequenceLoop.length-2){
+      this.interval=this.lastStep.timeStamp-this.state.sequenceLoop[this.index].timeStamp;
+      this.index=0; //se è l'ultimo deve prendere l'intervallo che c'è con l'elemento 0!!
+    }
+    else {
+      this.interval=this.state.sequenceLoop[this.index+1].timeStamp - this.state.sequenceLoop[this.index].timeStamp;
+      this.index++;
+    }
+    
+    this.expected += this.interval;
+    this.timerInUse = setTimeout(this.playSequence, this.interval - dt);
+  }
+
+  addToSequence(obj){
+    let mySequence = [...this.state.sequence];
+    mySequence.push(obj);
+    this.setState({
+      sequence:mySequence
+    });
+  }
+
+  addClick(timeStamp){
+    let myClicks=[...this.state.lastClicksHolder];
+    myClicks.push(timeStamp);
+    if(myClicks.length>5){
+      myClicks.shift();
+    }
+    this.setState({
+        lastClicksHolder:myClicks
+    })
+  }
+
+  activateRecording(){
+  
+    let start=this.state.lastClicksHolder[0];
+    let end=this.state.lastClicksHolder[this.state.lastClicksHolder.length-1];
+    let sequenceFiltered = this.state.sequence.filter(element => element.timeStamp > start && element.timeStamp < end);
+    // crea un nuovo arr toLoop con i click del metronomo mappati
+    let toLoop=this.state.lastClicksHolder.map(element => ({timeStamp:element, key:'click'}));
+    /*
+    //salva l'intervallo tra uno step e l'altro del metronomo
+    //this.clickStep = toLoop[1].timeStamp - toLoop[0].timeStamp;
+    */
+    //salva a parte l'ultimo elemento (il 5o click)
+    this.lastStep = toLoop.pop();
+    //concatena i tasti premuti
+    let loopConcat=toLoop.concat(sequenceFiltered);
+    //ordina per date
+    loopConcat.sort((a, b) => a.timeStamp - b.timeStamp);
+
+
+    this.setState({
+      recording:true,
+      sequenceLoop:loopConcat
+    }, () => {
+    this.startSequence(); //callback needed because setState is not immediate!
+    });
+
+  }
+
 	render(){
 		return(
 			<div className="app">
 				<div id = "drum-machine" className ="box">
-					<Drummachine/>
-					<Metronome/>
+					<Drummachine addToSequence={this.addToSequence}/>
+					<Metronome addClick={this.addClick}/>
+          <Looper timerStop={this.timerStop} activateRecording={this.activateRecording}/>
 				</div>
 			</div>
 		);
 	}
 }
 
+/* Salva una sequenza di oggetti (tasto premuto, timestamp) 
+ * di lunghezza compresa tra il primo e il 4 elemento dell'
+ * array lastClicks nello state di Metronome
+*/
 class Drummachine extends Component {
   constructor(props){
     super(props);
@@ -89,7 +213,10 @@ class Drummachine extends Component {
   	}
     this.updateDisplay=this.updateDisplay.bind(this);
     this.updateVolume=this.updateVolume.bind(this);
+    
   }
+
+  
 
   updateVolume(element){
   	this.setState({
@@ -110,7 +237,7 @@ class Drummachine extends Component {
         		<div className="keypad-screen" id="display"><p className="screen-text">{this.state.display}</p></div>
         	</div>
         	<div className="mid-sect">
-        		<AllTiles volume={this.state.volume} updateDisplay={this.updateDisplay}/>
+        		<AllTiles addToSequence={this.props.addToSequence} volume={this.state.volume} updateDisplay={this.updateDisplay}/>
         	</div>
         	<div className="footer">
         		<div className="slidecontainer">
@@ -127,7 +254,7 @@ class AllTiles extends Component {
   render(){
    let allKeys=db.map((element) => {
     return(
-        <SingleTile volume={this.props.volume} updateDisplay={this.props.updateDisplay} key={element.id} id={element.id} url={element.url} keyPress={element.keyPress} code={element.code}/>
+        <SingleTile addToSequence={this.props.addToSequence} volume={this.props.volume} updateDisplay={this.props.updateDisplay} key={element.id} id={element.id} url={element.url} keyPress={element.keyPress} code={element.code}/>
     )
     });
     return(
@@ -149,6 +276,13 @@ class SingleTile extends Component {
     	this.manageMouse = this.manageMouse.bind(this);
     	this.manageKeyboard = this.manageKeyboard.bind(this);
     	this.playSound = this.playSound.bind(this);
+      this.saveSequenceStep = this.saveSequenceStep.bind(this);
+    }
+
+    saveSequenceStep(){
+      let timeStamp=Date.now();
+      let key=this.props.keyPress;
+      this.props.addToSequence({timeStamp:timeStamp, key:key});
     }
 
     activatePad(){  
@@ -179,6 +313,7 @@ class SingleTile extends Component {
   	manageKeyboard(key){
     	if (key.keyCode === this.props.code) {
     		this.playSound();
+        this.saveSequenceStep();
         	this.props.updateDisplay(this.props.id);
     		this.activatePad();
     		setTimeout(() => this.activatePad(), 100);
@@ -186,6 +321,7 @@ class SingleTile extends Component {
   	}
 
   	manageMouse(element){
+      this.saveSequenceStep();
     	this.props.updateDisplay(this.props.id);
     	this.activatePad();
     	setTimeout(() => this.activatePad(), 100);
@@ -203,6 +339,9 @@ class SingleTile extends Component {
   	}
 }
 
+/* Salva nell'array lastClicks le timestamp degli ultimi 4 
+ * click del metronomo. 
+*/
 class Metronome extends Component {
   constructor(props){
     super(props);
@@ -212,7 +351,6 @@ class Metronome extends Component {
     	play:false,
     	beat:60
     }
-
 
    	this.step=this.step.bind(this);
    	this.click=this.click.bind(this);
@@ -226,7 +364,7 @@ class Metronome extends Component {
    	this.minusTen=this.minusTen.bind(this);
   }
 
-
+ 
   handleTimer(){
  	this.timerInUse ?
  	this.timerStop():
@@ -262,6 +400,7 @@ step() { //how to set an accurate timer: https://stackoverflow.com/questions/299
     audio.currentTime = 0;
     audio.volume=this.state.volume;
     audio.play();
+    this.props.addClick(Date.now());
   };
 
   timerStop() {
@@ -395,6 +534,31 @@ class MetronomeButton extends Component {
             </button>
 		)
 	}
+
+}
+
+class Looper extends Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      active:false
+    };
+    this.test=this.test.bind(this);
+  }
+
+  test(){
+    console.log('yey');
+  }
+
+  render(){
+return(
+  <div className="looperButtons">
+    <button onClick={this.props.activateRecording}>Loop last 4 bars</button>
+    <button onClick={this.props.timerStop}>Stop looping</button>
+  </div>
+  )
+
+  }
 
 }
 
