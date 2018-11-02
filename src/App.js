@@ -73,6 +73,7 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state = {
+      barsToLoop:6,
       looping:false,
       sequence:[],
       lastClicksHolder:[],
@@ -100,19 +101,19 @@ class App extends Component {
   }
 
   startSequence(){
-    if(sequenceLoop.length<3) { // && metronome is active
-    if(!this.state.looping) {
-    this.setState({
-      looping:true
-    })
-    this.index=0;
-    this.playSound(this.state.sequenceLoop[0].key);
-    this.interval=this.state.sequenceLoop[1].timeStamp - this.state.sequenceLoop[0].timeStamp;
-    this.index++;
-    this.expected = Date.now() + this.interval;
-    setTimeout(this.playSequence, this.interval); //if there are patentheis after this.playSequence it fires immediately ignoring timeout
+    if(this.state.lastClicksHolder.length===this.state.barsToLoop+1) { 
+      if(!this.state.looping) {
+        this.setState({
+        looping:true
+      })
+      this.index=0;
+      this.playSound(this.state.sequenceLoop[0].key);
+      this.interval=this.state.sequenceLoop[1].timeStamp - this.state.sequenceLoop[0].timeStamp;
+      this.index++;
+      this.expected = Date.now() + this.interval;
+      setTimeout(this.playSequence, this.interval); //if there are patentheis after this.playSequence it fires immediately ignoring timeout
+      }
     }
-  }
   }
 
   timerStop() {
@@ -126,6 +127,13 @@ class App extends Component {
   playSequence(){
     this.playSound(this.state.sequenceLoop[this.index].key);
     let dt = Date.now() - this.expected; 
+
+    if (dt < 0) { //disaster ricovery
+        dt = 0;
+    }
+    else if(dt > this.interval){ //disaster ricovery
+      this.timerStop();
+    }
 
     if(this.index>this.state.sequenceLoop.length-2){
       this.interval=this.lastStep.timeStamp-this.state.sequenceLoop[this.index].timeStamp;
@@ -151,7 +159,7 @@ class App extends Component {
   addClick(timeStamp){
     let myClicks=[...this.state.lastClicksHolder];
     myClicks.push(timeStamp);
-    if(myClicks.length>5){
+    if(myClicks.length>this.state.barsToLoop+1){ //we need 5 metronome clicks for save 4 bars
       myClicks.shift();
     }
     this.setState({
@@ -193,7 +201,7 @@ class App extends Component {
 				<div id = "drum-machine" className ="box">
 					<Drummachine addToSequence={this.addToSequence}/>
 					<Metronome addClick={this.addClick}/>
-          <Looper timerStop={this.timerStop} activateRecording={this.activateRecording}/>
+          <Looper barsToLoop={this.state.barsToLoop} timerStop={this.timerStop} activateRecording={this.activateRecording}/>
 				</div>
 			</div>
 		);
@@ -339,7 +347,7 @@ class SingleTile extends Component {
   	}
 }
 
-/* Salva nell'array lastClicks le timestamp degli ultimi 4 
+/* Salva nell'array lastClicks le timestamp degli ultimi this.state.barsToLoop 
  * click del metronomo. 
 */
 class Metronome extends Component {
@@ -553,6 +561,7 @@ class Looper extends Component {
   render(){
 return(
   <div className="looperButtons">
+    <div className="metronome-screen" id="display-looper"><p className="screen-text">{this.props.barsToLoop}</p></div>
     <button onClick={this.props.activateRecording}>Loop last 4 bars</button>
     <button onClick={this.props.timerStop}>Stop looping</button>
   </div>
