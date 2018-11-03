@@ -73,19 +73,38 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state = {
-      barsToLoop:6,
+      barsToLoop:4,
+      lampStyle:{backgroundColor:'black'}, 
       looping:false,
       sequence:[],
       lastClicksHolder:[],
       sequenceLoop:[]
     }
-    this.playSound=this.playSound.bind(this);
+    this.getSound=this.playSound.bind(this);
     this.addClick=this.addClick.bind(this);
     this.activateRecording = this.activateRecording.bind(this);
     this.addToSequence=this.addToSequence.bind(this);
     this.playSequence=this.playSequence.bind(this);
     this.startSequence=this.startSequence.bind(this);
     this.timerStop=this.timerStop.bind(this);
+    this.increaseBarsToLoop=this.increaseBarsToLoop.bind(this);
+    this.decreaseBarsToLoop=this.decreaseBarsToLoop.bind(this);
+  }
+
+  increaseBarsToLoop(){
+    
+    this.setState({
+      barsToLoop:this.state.barsToLoop+1
+    })
+    console.log(this.state.barsToLoop)
+  }
+
+  decreaseBarsToLoop(){
+    if (this.state.barsToLoop>1) {
+      this.setState({
+        barsToLoop:this.state.barsToLoop-1
+      })
+    }
   }
 
   playSound(key){
@@ -104,7 +123,9 @@ class App extends Component {
     if(this.state.lastClicksHolder.length===this.state.barsToLoop+1) { 
       if(!this.state.looping) {
         this.setState({
-        looping:true
+        //sequence:[], //clean the drumpad keypressing sequence
+        looping:true,
+        lampStyle:{backgroundColor:'red'}
       })
       this.index=0;
       this.playSound(this.state.sequenceLoop[0].key);
@@ -118,7 +139,8 @@ class App extends Component {
 
   timerStop() {
     this.setState({
-      looping:false
+      looping:false,
+      lampStyle:{backgroundColor:'black'}
     })
     clearInterval(this.timerInUse);
     this.timerInUse=0;
@@ -201,7 +223,7 @@ class App extends Component {
 				<div id = "drum-machine" className ="box">
 					<Drummachine addToSequence={this.addToSequence}/>
 					<Metronome addClick={this.addClick}/>
-          <Looper barsToLoop={this.state.barsToLoop} timerStop={this.timerStop} activateRecording={this.activateRecording}/>
+          <Looper lampStyle={this.state.lampStyle} increaseBarsToLoop={this.increaseBarsToLoop} decreaseBarsToLoop={this.decreaseBarsToLoop} barsToLoop={this.state.barsToLoop} timerStop={this.timerStop} activateRecording={this.activateRecording}/>
 				</div>
 			</div>
 		);
@@ -549,26 +571,56 @@ class Looper extends Component {
   constructor(props){
     super(props);
     this.state = {
+      volume:0.5,
       active:false
     };
-    this.test=this.test.bind(this);
+    this.updateVolumeLoop=this.updateVolumeLoop.bind(this);
   }
 
-  test(){
-    console.log('yey');
+   updateVolumeLoop(element){
+    this.setState({
+      volume:Number(element.target.value)
+    });   
   }
 
   render(){
 return(
-  <div className="looperButtons">
-    <div className="metronome-screen" id="display-looper"><p className="screen-text">{this.props.barsToLoop}</p></div>
-    <button onClick={this.props.activateRecording}>Loop last 4 bars</button>
-    <button onClick={this.props.timerStop}>Stop looping</button>
+  <div className="looper-container">
+    <div className="screen-section">
+      <div style={this.props.lampStyle} className="lamp"></div>
+      <div className="looper-screen" id="display-looper"><p className="screen-text">{this.props.barsToLoop}</p></div>
+    </div>
+    <div className="button-section">
+      <LooperButton clickFunct={this.props.activateRecording} buttonText={"Loop last bars"} id="start-loop-button"/>
+      <LooperButton clickFunct={this.props.timerStop} buttonText={"Stop looping"} id="stop-loop-button"/>
+      <LooperButton clickFunct={this.props.decreaseBarsToLoop} buttonText={"-"} id="decrease-loop-button"/>
+      <LooperButton clickFunct={this.props.increaseBarsToLoop} buttonText={"+"} id="increase-loop-button"/>
+    </div>
+    <div className="volume-section">
+      <input id="looper-slider" type="range" min="0" max="1" step="0.01" value={this.state.volume} onChange={this.updateVolumeLoop} />
+    </div>
   </div>
-  )
+)
+}
 
+}
+
+class LooperButton extends Component{
+  constructor(props){
+    super(props);
+    this.state = {
+      buttonStyle:{backgroundColor:'buttonface' }
+    
+    }
   }
 
+  render(){
+    return(
+      <button style={this.state.buttonStyle} id={this.props.id} onClick={this.props.clickFunct}>
+        {this.props.buttonText}
+      </button>
+    )
+  }
 }
 
 

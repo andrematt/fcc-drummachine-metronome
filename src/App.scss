@@ -15,7 +15,7 @@ html{
   margin: auto;
   display: flex;
   margin-top: 8%;
-  width: 600px;
+  width: 800px;
   height: 420px;
   background: none;
 
@@ -26,7 +26,7 @@ html{
     grid-template-rows: 1fr 2fr 1fr;
     position: relative;
     margin:auto;
-    width: 70%;
+    width: 50%;
     height:95%;
     border: solid 3px $lime;
     border-radius:10px;
@@ -110,7 +110,7 @@ html{
 .metronome-container{
   border: solid 3px $lime;
   border-radius:10px;
-  width:30%;
+  width:25%;
   height:95%;
   margin:auto;
   display:grid;
@@ -203,7 +203,87 @@ html{
   }
 }
 
+.looper-container{
+  border: solid 3px $lime;
+  border-radius:10px;
+  width:25%;
+  height:95%;
+  margin:auto;
+  display:grid;
+  grid-template-columns: 1fr;
+  grid-gap:3px;
+  grid-template-rows: 1fr 2fr 1fr;
+
+  .screen-section{
+    position:relative; //da specificare perchè lamp (position abs) si riferise all'ancestor posizionato
+    background-color:$lightGray;
+    display:flex;
+    align-items:center;
+
+  .lamp{
+  position:absolute;
+  right:12px;
+  top:6px;
+  width:10px;
+  height:10px;
+  border-radius:100%;
+  border-style: inset;
+  border-width: 2px;
+  margin:auto;
+  background-color: #32050C;
+  margin-top:5px;
 }
+
+   .looper-screen{ 
+      font-family:'Press Start 2P', cursive;
+      display:flex;
+      align-items:center;
+      position: relative;
+      margin:0 auto 0 auto; 
+      width: 45%;
+      height:40%;
+      border-color: $screen-border;
+      border-radius:10px;
+      border-style: inset;
+      border-width: 2px;
+      background: $screen;
+      
+      .screen-text{
+       margin:0 auto 0 auto;
+      }
+    }
+  }
+
+  .button-section{
+    background-color:$darkGray;
+    width:100%;
+    height:100%;
+    margin:auto;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap:3px;
+    grid-template-rows: 1fr 1fr;
+
+    button{
+      border-radius:10px;
+    }
+  }
+
+  .volume-section{
+    background-color:$lightGray;
+    display:flex;
+    align-items:center;
+    input{
+      margin:0 auto 0 auto; margin:auto;
+    }
+
+  }
+
+
+}
+
+
+} /* box */
 
 
 
@@ -215,12 +295,12 @@ html{
     display: block;
     margin-top: 2%;
     width: 400px;
-    height: 680px;
+    height: 900px;
     background: none;
 
     .keypad-container{
       width: 95%;
-      height:45%;
+      height:30%;
       .keypad-screen{
         font-size:14px;
       }
@@ -228,7 +308,12 @@ html{
 
    .metronome-container{
       width: 95%;
-      height:45%;
+      height:30%;
+    }
+
+    .looper-container{
+      width: 95%;
+      height:30%;
     }
   }
 }

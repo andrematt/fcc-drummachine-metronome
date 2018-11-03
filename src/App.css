@@ -7,7 +7,7 @@ html {
   margin: auto;
   display: flex;
   margin-top: 8%;
-  width: 600px;
+  width: 800px;
   height: 420px;
   background: none;
 }
@@ -18,7 +18,7 @@ html {
   grid-template-rows: 1fr 2fr 1fr;
   position: relative;
   margin: auto;
-  width: 70%;
+  width: 50%;
   height: 95%;
   border: solid 3px #99CC00;
   border-radius: 10px;
@@ -91,7 +91,7 @@ html {
 .box .metronome-container {
   border: solid 3px #99CC00;
   border-radius: 10px;
-  width: 30%;
+  width: 25%;
   height: 95%;
   margin: auto;
   display: grid;
@@ -170,7 +170,77 @@ html {
   width: 100%;
   color: #333333 !important;
 }
+.box .looper-container {
+  border: solid 3px #99CC00;
+  border-radius: 10px;
+  width: 25%;
+  height: 95%;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 3px;
+  grid-template-rows: 1fr 2fr 1fr;
+}
+.box .looper-container .screen-section {
+  position: relative;
+  background-color: #CCCCCC;
+  display: flex;
+  align-items: center;
+}
+.box .looper-container .screen-section .lamp {
+  position: absolute;
+  right: 12px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 100%;
+  border-style: inset;
+  border-width: 2px;
+  margin: auto;
+  background-color: #32050C;
+  margin-top: 5px;
+}
+.box .looper-container .screen-section .looper-screen {
+  font-family: "Press Start 2P", cursive;
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin: 0 auto 0 auto;
+  width: 45%;
+  height: 40%;
+  border-color: #3399ff;
+  border-radius: 10px;
+  border-style: inset;
+  border-width: 2px;
+  background: #6699ff;
+}
+.box .looper-container .screen-section .looper-screen .screen-text {
+  margin: 0 auto 0 auto;
+}
+.box .looper-container .button-section {
+  background-color: #999999;
+  width: 100%;
+  height: 100%;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 3px;
+  grid-template-rows: 1fr 1fr;
+}
+.box .looper-container .button-section button {
+  border-radius: 10px;
+}
+.box .looper-container .volume-section {
+  background-color: #CCCCCC;
+  display: flex;
+  align-items: center;
+}
+.box .looper-container .volume-section input {
+  margin: 0 auto 0 auto;
+  margin: auto;
+}
 
+/* box */
 @media all and (max-width: 600px) {
   .box {
     position: relative;
@@ -178,19 +248,23 @@ html {
     display: block;
     margin-top: 2%;
     width: 400px;
-    height: 680px;
+    height: 900px;
     background: none;
   }
   .box .keypad-container {
     width: 95%;
-    height: 45%;
+    height: 30%;
   }
   .box .keypad-container .keypad-screen {
     font-size: 14px;
   }
   .box .metronome-container {
     width: 95%;
-    height: 45%;
+    height: 30%;
+  }
+  .box .looper-container {
+    width: 95%;
+    height: 30%;
   }
 }
 
