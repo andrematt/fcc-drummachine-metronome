@@ -69,34 +69,31 @@ const metronomeClick= "https://sampleswap.org/samples-ghost/DRUMS%20(FULL%20KITS
 
 
 
+/*  Handle the connection between components, getting data
+ *  from Drummachine and Metronome via the passed addToSequence
+ *  and addClick functions, and passing them to the Looper
+ *  component via sequence and lastClicksHolder props. 
+ *  Handle the size of the looping sequence via barsToLoop
+ *  props and related functions. 
+*/
 class App extends Component {
   constructor(props){
     super(props);
     this.state = {
       barsToLoop:4,
-      lampStyle:{backgroundColor:'black'}, 
-      looping:false,
       sequence:[],
-      lastClicksHolder:[],
-      sequenceLoop:[]
+      lastClicksHolder:[]    
     }
-    this.getSound=this.playSound.bind(this);
-    this.addClick=this.addClick.bind(this);
-    this.activateRecording = this.activateRecording.bind(this);
-    this.addToSequence=this.addToSequence.bind(this);
-    this.playSequence=this.playSequence.bind(this);
-    this.startSequence=this.startSequence.bind(this);
-    this.timerStop=this.timerStop.bind(this);
     this.increaseBarsToLoop=this.increaseBarsToLoop.bind(this);
     this.decreaseBarsToLoop=this.decreaseBarsToLoop.bind(this);
+    this.addClick=this.addClick.bind(this);
+    this.addToSequence=this.addToSequence.bind(this);   
   }
 
   increaseBarsToLoop(){
-    
     this.setState({
       barsToLoop:this.state.barsToLoop+1
     })
-    console.log(this.state.barsToLoop)
   }
 
   decreaseBarsToLoop(){
@@ -107,69 +104,6 @@ class App extends Component {
     }
   }
 
-  playSound(key){
-    let audio;
-    if(key==='click') {
-      audio = new Audio(metronomeClick);
-    }
-    else {
-     audio = document.getElementById(key);
-    }
-    audio.currentTime = 0;
-    audio.play();
-  }
-
-  startSequence(){
-    if(this.state.lastClicksHolder.length===this.state.barsToLoop+1) { 
-      if(!this.state.looping) {
-        this.setState({
-        //sequence:[], //clean the drumpad keypressing sequence
-        looping:true,
-        lampStyle:{backgroundColor:'red'}
-      })
-      this.index=0;
-      this.playSound(this.state.sequenceLoop[0].key);
-      this.interval=this.state.sequenceLoop[1].timeStamp - this.state.sequenceLoop[0].timeStamp;
-      this.index++;
-      this.expected = Date.now() + this.interval;
-      setTimeout(this.playSequence, this.interval); //if there are patentheis after this.playSequence it fires immediately ignoring timeout
-      }
-    }
-  }
-
-  timerStop() {
-    this.setState({
-      looping:false,
-      lampStyle:{backgroundColor:'black'}
-    })
-    clearInterval(this.timerInUse);
-    this.timerInUse=0;
-  }
-
-  playSequence(){
-    this.playSound(this.state.sequenceLoop[this.index].key);
-    let dt = Date.now() - this.expected; 
-
-    if (dt < 0) { //disaster ricovery
-        dt = 0;
-    }
-    else if(dt > this.interval){ //disaster ricovery
-      this.timerStop();
-    }
-
-    if(this.index>this.state.sequenceLoop.length-2){
-      this.interval=this.lastStep.timeStamp-this.state.sequenceLoop[this.index].timeStamp;
-      this.index=0; //se è l'ultimo deve prendere l'intervallo che c'è con l'elemento 0!!
-    }
-    else {
-      this.interval=this.state.sequenceLoop[this.index+1].timeStamp - this.state.sequenceLoop[this.index].timeStamp;
-      this.index++;
-    }
-    
-    this.expected += this.interval;
-    this.timerInUse = setTimeout(this.playSequence, this.interval - dt);
-  }
-
   addToSequence(obj){
     let mySequence = [...this.state.sequence];
     mySequence.push(obj);
@@ -178,9 +112,13 @@ class App extends Component {
     });
   }
 
+  /* spostare il controllo sulla lunghezza nella funzione
+   * activateLooping: così si possono spostare in looper
+   * anche barsToLoop, increaseBarsToLoop e decreaseBarsToLoop
+  */ 
   addClick(timeStamp){
     let myClicks=[...this.state.lastClicksHolder];
-    myClicks.push(timeStamp);
+    myClicks.push(timeStamp); 
     if(myClicks.length>this.state.barsToLoop+1){ //we need 5 metronome clicks for save 4 bars
       myClicks.shift();
     }
@@ -189,33 +127,6 @@ class App extends Component {
     })
   }
 
-  activateRecording(){
-  
-    let start=this.state.lastClicksHolder[0];
-    let end=this.state.lastClicksHolder[this.state.lastClicksHolder.length-1];
-    let sequenceFiltered = this.state.sequence.filter(element => element.timeStamp > start && element.timeStamp < end);
-    // crea un nuovo arr toLoop con i click del metronomo mappati
-    let toLoop=this.state.lastClicksHolder.map(element => ({timeStamp:element, key:'click'}));
-    /*
-    //salva l'intervallo tra uno step e l'altro del metronomo
-    //this.clickStep = toLoop[1].timeStamp - toLoop[0].timeStamp;
-    */
-    //salva a parte l'ultimo elemento (il 5o click)
-    this.lastStep = toLoop.pop();
-    //concatena i tasti premuti
-    let loopConcat=toLoop.concat(sequenceFiltered);
-    //ordina per date
-    loopConcat.sort((a, b) => a.timeStamp - b.timeStamp);
-
-
-    this.setState({
-      recording:true,
-      sequenceLoop:loopConcat
-    }, () => {
-    this.startSequence(); //callback needed because setState is not immediate!
-    });
-
-  }
 
 	render(){
 		return(
@@ -223,16 +134,14 @@ class App extends Component {
 				<div id = "drum-machine" className ="box">
 					<Drummachine addToSequence={this.addToSequence}/>
 					<Metronome addClick={this.addClick}/>
-          <Looper lampStyle={this.state.lampStyle} increaseBarsToLoop={this.increaseBarsToLoop} decreaseBarsToLoop={this.decreaseBarsToLoop} barsToLoop={this.state.barsToLoop} timerStop={this.timerStop} activateRecording={this.activateRecording}/>
+          <Looper sequence={this.state.sequence} lastClicksHolder={this.state.lastClicksHolder}increaseBarsToLoop={this.increaseBarsToLoop} decreaseBarsToLoop={this.decreaseBarsToLoop} barsToLoop={this.state.barsToLoop}/>
 				</div>
 			</div>
 		);
 	}
 }
 
-/* Salva una sequenza di oggetti (tasto premuto, timestamp) 
- * di lunghezza compresa tra il primo e il 4 elemento dell'
- * array lastClicks nello state di Metronome
+/* Container class for the keypad. Handles volume and display. 
 */
 class Drummachine extends Component {
   constructor(props){
@@ -243,10 +152,7 @@ class Drummachine extends Component {
   	}
     this.updateDisplay=this.updateDisplay.bind(this);
     this.updateVolume=this.updateVolume.bind(this);
-    
   }
-
-  
 
   updateVolume(element){
   	this.setState({
@@ -279,13 +185,16 @@ class Drummachine extends Component {
   }
 }
 
+/* Container class for the tiles. Maps each database element
+ * (holding url of sound, associated key..)to a SingleTile 
+ * component, returns the resulting array. 
+*/
 class AllTiles extends Component {
-
   render(){
    let allKeys=db.map((element) => {
     return(
         <SingleTile addToSequence={this.props.addToSequence} volume={this.props.volume} updateDisplay={this.props.updateDisplay} key={element.id} id={element.id} url={element.url} keyPress={element.keyPress} code={element.code}/>
-    )
+      )
     });
     return(
       <div className="keys-grid">
@@ -295,34 +204,35 @@ class AllTiles extends Component {
   }
 }
 
-
+/* SingleTile 
+*/
 class SingleTile extends Component {
-    constructor(props){
-    	super(props);
+  constructor(props){
+    super(props);
 		this.state = {
-    		padStyle: {backgroundColor:'buttonface' }
-    	}
-    	this.activatePad=this.activatePad.bind(this);
-    	this.manageMouse = this.manageMouse.bind(this);
-    	this.manageKeyboard = this.manageKeyboard.bind(this);
-    	this.playSound = this.playSound.bind(this);
-      this.saveSequenceStep = this.saveSequenceStep.bind(this);
+    	padStyle: {backgroundColor:'buttonface' }
     }
+    this.activatePad=this.activatePad.bind(this);
+    this.manageMouse = this.manageMouse.bind(this);
+    this.manageKeyboard = this.manageKeyboard.bind(this);
+    this.playSound = this.playSound.bind(this);
+    this.saveSequenceStep = this.saveSequenceStep.bind(this);
+  }
 
-    saveSequenceStep(){
-      let timeStamp=Date.now();
-      let key=this.props.keyPress;
-      this.props.addToSequence({timeStamp:timeStamp, key:key});
-    }
+  saveSequenceStep(){
+    let timeStamp=Date.now();
+    let key=this.props.keyPress;
+    this.props.addToSequence({timeStamp:timeStamp, key:key});
+  }
 
-    activatePad(){  
+  activatePad(){  
     this.state.padStyle.backgroundColor === 'orange' ?
-    this.setState({
+      this.setState({
     		padStyle: {backgroundColor:'buttonface'}
     	}) :
     	this.setState({
-          	padStyle:  {backgroundColor:'orange', borderStyle: 'inset'}
-        });
+        padStyle:  {backgroundColor:'orange', borderStyle: 'inset'}
+      });
   	}
 
     playSound(){
@@ -344,7 +254,7 @@ class SingleTile extends Component {
     	if (key.keyCode === this.props.code) {
     		this.playSound();
         this.saveSequenceStep();
-        	this.props.updateDisplay(this.props.id);
+        this.props.updateDisplay(this.props.id);
     		this.activatePad();
     		setTimeout(() => this.activatePad(), 100);
     	}
@@ -360,11 +270,12 @@ class SingleTile extends Component {
 
   	render(){
   		return(
-      		<button className="drum-pad-button" style={this.state.padStyle} onClick={this.manageMouse}key={this.props.id+"-button"}> 
-      			<div className="drum-pad" title={this.props.keyPress}  id={this.props.id}>{this.props.keyPress}
-      		 	<audio className='clip' id={this.props.keyPress} src={this.props.url}></audio>
-      			</div>
-      		</button>
+      	<button className="drum-pad-button" style={this.state.padStyle} onClick={this.manageMouse}key={this.props.id+"-button"}> 
+      		<div className="drum-pad" title={this.props.keyPress}  id={this.props.id}>{this.props.keyPress}
+      		 	<audio className='clip' id={this.props.keyPress} src={this.props.url}>
+            </audio>
+      		</div>
+      	</button>
     	)
   	}
 }
@@ -397,35 +308,33 @@ class Metronome extends Component {
  
   handleTimer(){
  	this.timerInUse ?
- 	this.timerStop():
+ 	  this.timerStop():
   	this.timerStart();
   }
 
- timerStart(){
- 	this.setState({
+  timerStart(){
+ 	  this.setState({
   		play:true
-	})
-  	this.interval = 6000/this.state.beat*10;
-	this.expected = Date.now() + this.interval;
-	setTimeout(this.step(), this.interval);
- }
+	  })
+    this.interval = 6000/this.state.beat*10;
+	  this.expected = Date.now() + this.interval;
+	  setTimeout(this.step(), this.interval);
+  }
 
-step() { //how to set an accurate timer: https://stackoverflow.com/questions/29971898/how-to-create-an-accurate-timer-in-javascript
-    var dt = Date.now() - this.expected; 
-   
+  step() { //how to set an accurate timer: https://stackoverflow.com/questions/29971898/how-to-create-an-accurate-timer-in-javascript
+    var dt = Date.now() - this.expected;  
     if (dt < 0) {
         dt = 0;
     }
     else if(dt > this.interval){
     	this.timerStop();
     }
-        
     this.click();
-	this.expected += this.interval;
+	  this.expected += this.interval;
     this.timerInUse = setTimeout(this.step, this.interval - dt);
-}
+  }
 
- click() {
+  click() {
     let audio = new Audio(metronomeClick);
     audio.currentTime = 0;
     audio.volume=this.state.volume;
@@ -436,7 +345,7 @@ step() { //how to set an accurate timer: https://stackoverflow.com/questions/299
   timerStop() {
   	this.setState({
   		play:false
-	})
+	  })
   	clearInterval(this.timerInUse);
     this.timerInUse=0;
   }
@@ -484,23 +393,22 @@ step() { //how to set an accurate timer: https://stackoverflow.com/questions/299
   	}); 	
   }
 
-
-
   render(){
     return(
     	<div className = "metronome-container">
-    	<div className = "upper-sect">
-       		<div className="metronome-screen" id="display-metronome"><p className="screen-text">{this.state.beat}</p></div>
+    	  <div className = "upper-sect">
+       		<div className="metronome-screen" id="display-metronome"><p className="screen-text">{this.state.beat}</p>
+          </div>
         </div>
         <div className = "mid-sect">
         	<MetronomePad timerStop={this.timerStop} plusOne={this.plusOne} plusTen={this.plusTen} minusOne={this.minusOne} minusTen={this.minusTen}  status={this.state.play} updatePlay={this.handleTimer}/>
        	</div>
        	<div className = "footer">
-       	<div className="slidecontainer">
-				<input id="metronome-slider" type="range" min="0" max="1" step="0.01" value={this.state.volume} onChange={this.updateVolumeMet} />
-			</div>
-		</div>
-      	</div>
+       	  <div className="slidecontainer">
+				    <input id="metronome-slider" type="range" min="0" max="1" step="0.01" value={this.state.volume} onChange={this.updateVolumeMet} />
+			    </div>
+		    </div>
+      </div>
     )
   }
 }
@@ -514,9 +422,9 @@ class MetronomePad extends Component {
 	  		<MetronomeButton adderFunct={this.props.updatePlay} timerStop={this.props.timerStop} status = {this.props.status} id='button-center'icon={[faPlay, faPause]}/>
 	  		<MetronomeButton adderFunct={this.props.plusOne} timerStop={this.props.timerStop}   status = {this.props.status} id='button-right' icon={[faAngleRight]}/>
 	  		<MetronomeButton adderFunct={this.props.plusTen} timerStop={this.props.timerStop}  status = {this.props.status} id='button-double-right'icon={[faAngleDoubleRight]}/>
-        </div>
-        )
-     };
+      </div>
+    )
+  };
 }
 
 class MetronomeButton extends Component {
@@ -527,17 +435,17 @@ class MetronomeButton extends Component {
 		}
 		this.assignIcon=this.assignIcon.bind(this);
 		this.clickFunct = this.clickFunct.bind(this);
-	   	this.buttonPress = this.buttonPress.bind(this);
+	  this.buttonPress = this.buttonPress.bind(this);
 	}
 
   buttonPress(){  
     this.state.buttonStyle.backgroundColor === 'orange' ?
-    this.setState({
+      this.setState({
     		buttonStyle: {backgroundColor:'buttonface'}
     	}) :
     	this.setState({
-          	buttonStyle:  {backgroundColor:'orange', borderStyle: 'inset'}
-        });
+        buttonStyle:  {backgroundColor:'orange', borderStyle: 'inset'}
+      });
   	}
 
 
@@ -548,23 +456,20 @@ class MetronomeButton extends Component {
 	}
 
 
-	assignIcon(){
-	
-	return (this.props.icon.length>1) ?
+	assignIcon(){ //if there is only 1 icon assign that, otherwise one or the other basing on this.props.status
+	return (this.props.icon.length>1) ? 
 		(this.props.status === false ? this.props.icon[0] : this.props.icon[1])
 		:
 		this.props.icon[0];
-
 	}
 
 	render(){
 		return(
 			<button style={this.state.buttonStyle} id={this.props.id} onClick={this.clickFunct}>
-               	<FontAwesomeIcon  className="fa-icon" icon={this.assignIcon()}/>
-            </button>
+        <FontAwesomeIcon  className="fa-icon" icon={this.assignIcon()}/>
+      </button>
 		)
 	}
-
 }
 
 class Looper extends Component {
@@ -572,37 +477,134 @@ class Looper extends Component {
     super(props);
     this.state = {
       volume:0.5,
-      active:false
+      lampStyle:{backgroundColor:'black'}, 
+      looping:false,
+      sequenceLoop:[]
     };
     this.updateVolumeLoop=this.updateVolumeLoop.bind(this);
+    this.playSound=this.playSound.bind(this);
+    this.activateLooping = this.activateLooping.bind(this);
+    this.playSequence=this.playSequence.bind(this);
+    this.startSequence=this.startSequence.bind(this);
+    this.timerStop=this.timerStop.bind(this);
   }
 
-   updateVolumeLoop(element){
+  playSound(key){
+    let audio;
+    if(key==='click') {
+      audio = new Audio(metronomeClick);
+    }
+    else {
+     audio = document.getElementById(key);
+    }
+    audio.currentTime = 0;
+    audio.volume=this.state.volume;
+    audio.play();
+  }
+
+  startSequence(){
+    if(this.props.lastClicksHolder.length===this.props.barsToLoop+1) { 
+      if(!this.state.looping) {
+        this.setState({
+        //sequence:[], //clean the drumpad keypressing sequence
+        looping:true,
+        lampStyle:{backgroundColor:'red'}
+      })
+      this.index=0;
+      this.playSound(this.state.sequenceLoop[0].key);
+      this.interval=this.state.sequenceLoop[1].timeStamp - this.state.sequenceLoop[0].timeStamp;
+      this.index++;
+      this.expected = Date.now() + this.interval;
+      setTimeout(this.playSequence, this.interval); //if there are patentheis after this.playSequence it fires immediately ignoring timeout
+      }
+    }
+  }
+
+  timerStop() {
+    this.setState({
+      looping:false,
+      lampStyle:{backgroundColor:'black'}
+    })
+    clearInterval(this.timerInUse);
+    this.timerInUse=0;
+  }
+
+  playSequence(){
+    this.playSound(this.state.sequenceLoop[this.index].key);
+    let dt = Date.now() - this.expected; 
+    if (dt < 0) { //disaster ricovery
+        dt = 0;
+    }
+    else if(dt > this.interval){ //disaster ricovery
+      this.timerStop();
+    }
+    if(this.index>this.state.sequenceLoop.length-2){
+      this.interval=this.lastStep.timeStamp-this.state.sequenceLoop[this.index].timeStamp;
+      this.index=0; //se è l'ultimo deve prendere l'intervallo che c'è con l'elemento 0!!
+    }
+    else {
+      this.interval=this.state.sequenceLoop[this.index+1].timeStamp - this.state.sequenceLoop[this.index].timeStamp;
+      this.index++;
+    }
+    this.expected += this.interval;
+    this.timerInUse = setTimeout(this.playSequence, this.interval - dt);
+  }
+
+  
+  activateLooping(){
+    let start=this.props.lastClicksHolder[0];
+    let end=this.props.lastClicksHolder[this.props.lastClicksHolder.length-1];
+    let sequenceFiltered = this.props.sequence.filter(element => element.timeStamp > start && element.timeStamp < end);
+    // crea un nuovo arr toLoop con i click del metronomo mappati
+    let toLoop=this.props.lastClicksHolder.map(element => ({timeStamp:element, key:'click'}));
+    /*
+    //salva l'intervallo tra uno step e l'altro del metronomo
+    //this.clickStep = toLoop[1].timeStamp - toLoop[0].timeStamp;
+    */
+    //salva a parte l'ultimo elemento (il 5o click)
+    this.lastStep = toLoop.pop();
+    //concatena i tasti premuti
+    let loopConcat=toLoop.concat(sequenceFiltered);
+    //ordina per date
+    loopConcat.sort((a, b) => a.timeStamp - b.timeStamp);
+
+
+    this.setState({
+      recording:true,
+      sequenceLoop:loopConcat
+    }, () => {
+    this.startSequence(); //callback needed because setState is not immediate!
+    });
+
+  }
+
+  updateVolumeLoop(element){
     this.setState({
       volume:Number(element.target.value)
     });   
   }
 
   render(){
-return(
-  <div className="looper-container">
-    <div className="screen-section">
-      <div style={this.props.lampStyle} className="lamp"></div>
-      <div className="looper-screen" id="display-looper"><p className="screen-text">{this.props.barsToLoop}</p></div>
-    </div>
-    <div className="button-section">
-      <LooperButton clickFunct={this.props.activateRecording} buttonText={"Loop last bars"} id="start-loop-button"/>
-      <LooperButton clickFunct={this.props.timerStop} buttonText={"Stop looping"} id="stop-loop-button"/>
-      <LooperButton clickFunct={this.props.decreaseBarsToLoop} buttonText={"-"} id="decrease-loop-button"/>
-      <LooperButton clickFunct={this.props.increaseBarsToLoop} buttonText={"+"} id="increase-loop-button"/>
-    </div>
-    <div className="volume-section">
-      <input id="looper-slider" type="range" min="0" max="1" step="0.01" value={this.state.volume} onChange={this.updateVolumeLoop} />
-    </div>
-  </div>
-)
-}
-
+    return(
+      <div className="looper-container">
+        <div className="screen-section">
+          <div style={this.state.lampStyle} className="lamp" />
+          <div className="looper-screen" id="display-looper">
+            <p className="screen-text">{this.props.barsToLoop}</p>
+          </div>
+        </div>
+        <div className="button-section">
+          <LooperButton clickFunct={this.activateLooping} buttonText={"Loop last bars"} id="start-loop-button"/>
+          <LooperButton clickFunct={this.timerStop} buttonText={"Stop looping"} id="stop-loop-button"/>
+          <LooperButton clickFunct={this.props.decreaseBarsToLoop} buttonText={"-"} id="decrease-loop-button"/>
+          <LooperButton clickFunct={this.props.increaseBarsToLoop} buttonText={"+"} id="increase-loop-button"/>
+        </div>
+        <div className="volume-section">
+          <input id="looper-slider" type="range" min="0" max="1" step="0.01" value={this.state.volume} onChange={this.updateVolumeLoop} />
+        </div>
+      </div>
+    )
+  }
 }
 
 class LooperButton extends Component{
@@ -610,13 +612,30 @@ class LooperButton extends Component{
     super(props);
     this.state = {
       buttonStyle:{backgroundColor:'buttonface' }
-    
     }
+    this.buttonPress=this.buttonPress.bind(this);
+    this.myClickFunct=this.myClickFunct.bind(this);
+  }
+
+  buttonPress(){  
+    this.state.buttonStyle.backgroundColor === 'orange' ?
+      this.setState({
+        buttonStyle: {backgroundColor:'buttonface'}
+      }) :
+      this.setState({
+            buttonStyle:  {backgroundColor:'orange', borderStyle: 'inset'}
+      });
+  }
+
+  myClickFunct(){
+    this.props.clickFunct();
+    this.buttonPress();
+    setTimeout(() => this.buttonPress(), 100);
   }
 
   render(){
     return(
-      <button style={this.state.buttonStyle} id={this.props.id} onClick={this.props.clickFunct}>
+      <button style={this.state.buttonStyle} id={this.props.id} onClick={this.myClickFunct}>
         {this.props.buttonText}
       </button>
     )
