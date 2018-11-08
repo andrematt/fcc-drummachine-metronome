@@ -2,6 +2,7 @@ $screen:#6699ff;
 $screen-border:#3399ff;
 $lime: #99CC00;
 $black: #333333;
+$almost-black:#32050C;
 $lightGray: #CCCCCC;
 $darkGray: #999999;
 $white: #fff;
@@ -10,14 +11,36 @@ html{
   background-color:$black;
 }
 
+  .page-header{
+
+  .title-section{
+    color: $lightGray;
+    text-align:center;
+    display:grid;
+    grid-template-columns: 1fr 10fr 1fr;
+    align-items:center;
+    .fa-icon{
+      margin-left:4%;
+      font-size:30px;
+    }
+  }
+  .help-section{
+      margin: auto;
+      padding: 5px;
+      background-color: $white;
+      width:95%;
+    }
+}
+
 .box{
   position: relative;
   margin: auto;
   display: flex;
-  margin-top: 8%;
+  margin-top: 3%;
   width: 800px;
   height: 420px;
   background: none;
+
 
   .keypad-container{
     display:grid;
@@ -76,14 +99,14 @@ html{
           display:flex;
           border-radius:10px;
           align-items:center;
-          height:100%; //necessario perchè l'altezza di un elemento figlio è calcolata se l'elemento padre ha specificato height
+          height:100%; //needed because height of a child element is calculated if parent element has height specified
 
           .drum-pad{
             line-height:30px;
             display:inline-block;
             cursor:pointer;
             position: relative;
-            width:100%;//significa 100% dell'elemento padre
+            width:100%;//means 100% of the parent element
           }
         } 
       }
@@ -215,7 +238,7 @@ html{
   grid-template-rows: 1fr 2fr 1fr;
 
   .screen-section{
-    position:relative; //da specificare perchè lamp (position abs) si riferise all'ancestor posizionato
+    position:relative; //lamp (position:absolute) refers to the nearest positioned ancestor
     background-color:$lightGray;
     display:flex;
     align-items:center;
@@ -230,7 +253,7 @@ html{
   border-style: inset;
   border-width: 2px;
   margin:auto;
-  background-color: #32050C;
+  background-color: $almost-black;
   margin-top:5px;
 }
 

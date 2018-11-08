@@ -6,6 +6,7 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons';
 import { faPause } from '@fortawesome/free-solid-svg-icons';
 import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
 import { faAngleDoubleRight } from '@fortawesome/free-solid-svg-icons';
+import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
 import './App.css';
 
 const db = [
@@ -69,7 +70,8 @@ const metronomeClick= "https://sampleswap.org/samples-ghost/DRUMS%20(FULL%20KITS
 
 
 
-/*  Handle the connection between components, getting data
+/*  App
+ *  Handle the connection between components, getting data
  *  from Drummachine and Metronome via the passed addToSequence
  *  and addClick functions, and passing them to the Looper
  *  component via sequence and lastClicksHolder props. 
@@ -112,10 +114,6 @@ class App extends Component {
     });
   }
 
-  /* spostare il controllo sulla lunghezza nella funzione
-   * activateLooping: così si possono spostare in looper
-   * anche barsToLoop, increaseBarsToLoop e decreaseBarsToLoop
-  */ 
   addClick(timeStamp){
     let myClicks=[...this.state.lastClicksHolder];
     myClicks.push(timeStamp); 
@@ -131,9 +129,10 @@ class App extends Component {
 	render(){
 		return(
 			<div className="app">
-				<div id = "drum-machine" className ="box">
-					<Drummachine addToSequence={this.addToSequence}/>
-					<Metronome addClick={this.addClick}/>
+        <PageHeader />
+        <div id = "drum-machine" className ="box">
+					 <Drummachine addToSequence={this.addToSequence}/>
+					 <Metronome addClick={this.addClick}/>
           <Looper sequence={this.state.sequence} lastClicksHolder={this.state.lastClicksHolder}increaseBarsToLoop={this.increaseBarsToLoop} decreaseBarsToLoop={this.decreaseBarsToLoop} barsToLoop={this.state.barsToLoop}/>
 				</div>
 			</div>
@@ -141,7 +140,8 @@ class App extends Component {
 	}
 }
 
-/* Container class for the keypad. Handles volume and display. 
+/*  Drummachine
+ *  Container class for the keypad. Handles volume and display. 
 */
 class Drummachine extends Component {
   constructor(props){
@@ -185,7 +185,8 @@ class Drummachine extends Component {
   }
 }
 
-/* Container class for the tiles. Maps each database element
+/* AllTiles
+ * Container class for the tiles. Maps each database element
  * (holding url of sound, associated key..)to a SingleTile 
  * component, returns the resulting array. 
 */
@@ -204,7 +205,7 @@ class AllTiles extends Component {
   }
 }
 
-/* SingleTile 
+/* SingleTile
 */
 class SingleTile extends Component {
   constructor(props){
@@ -280,8 +281,9 @@ class SingleTile extends Component {
   	}
 }
 
-/* Salva nell'array lastClicks le timestamp degli ultimi this.state.barsToLoop 
- * click del metronomo. 
+/*  Metronome
+ *  Handles his own display, volume, status and beat passing
+ *  down functions to MetronomePad component
 */
 class Metronome extends Component {
   constructor(props){
@@ -413,6 +415,8 @@ class Metronome extends Component {
   }
 }
 
+/*  MetronomePad
+*/
 class MetronomePad extends Component {
 	render(){
 		return(
@@ -427,6 +431,8 @@ class MetronomePad extends Component {
   };
 }
 
+/*  MetronomeButton
+*/
 class MetronomeButton extends Component {
 	constructor(props){
 		super(props);
@@ -472,6 +478,8 @@ class MetronomeButton extends Component {
 	}
 }
 
+/*  Looper
+*/
 class Looper extends Component {
   constructor(props){
     super(props);
@@ -515,7 +523,7 @@ class Looper extends Component {
       this.interval=this.state.sequenceLoop[1].timeStamp - this.state.sequenceLoop[0].timeStamp;
       this.index++;
       this.expected = Date.now() + this.interval;
-      setTimeout(this.playSequence, this.interval); //if there are patentheis after this.playSequence it fires immediately ignoring timeout
+      setTimeout(this.playSequence, this.interval); //if there are parenthesis after this.playSequence it fires immediately ignoring timeout
       }
     }
   }
@@ -538,9 +546,9 @@ class Looper extends Component {
     else if(dt > this.interval){ //disaster ricovery
       this.timerStop();
     }
-    if(this.index>this.state.sequenceLoop.length-2){
-      this.interval=this.lastStep.timeStamp-this.state.sequenceLoop[this.index].timeStamp;
-      this.index=0; //se è l'ultimo deve prendere l'intervallo che c'è con l'elemento 0!!
+    if(this.index>this.state.sequenceLoop.length-2){ //if is the last element
+      this.interval=this.lastStep.timeStamp-this.state.sequenceLoop[this.index].timeStamp; //take the interval between it and the "closing" metronome click (it's not in the sequence)
+      this.index=0; 
     }
     else {
       this.interval=this.state.sequenceLoop[this.index+1].timeStamp - this.state.sequenceLoop[this.index].timeStamp;
@@ -554,20 +562,11 @@ class Looper extends Component {
   activateLooping(){
     let start=this.props.lastClicksHolder[0];
     let end=this.props.lastClicksHolder[this.props.lastClicksHolder.length-1];
-    let sequenceFiltered = this.props.sequence.filter(element => element.timeStamp > start && element.timeStamp < end);
-    // crea un nuovo arr toLoop con i click del metronomo mappati
-    let toLoop=this.props.lastClicksHolder.map(element => ({timeStamp:element, key:'click'}));
-    /*
-    //salva l'intervallo tra uno step e l'altro del metronomo
-    //this.clickStep = toLoop[1].timeStamp - toLoop[0].timeStamp;
-    */
-    //salva a parte l'ultimo elemento (il 5o click)
-    this.lastStep = toLoop.pop();
-    //concatena i tasti premuti
-    let loopConcat=toLoop.concat(sequenceFiltered);
-    //ordina per date
-    loopConcat.sort((a, b) => a.timeStamp - b.timeStamp);
-
+    let sequenceFiltered = this.props.sequence.filter(element => element.timeStamp > start && element.timeStamp < end); //filter the drummachine keypressings ouside the metronome clicks sequence
+    let toLoop=this.props.lastClicksHolder.map(element => ({timeStamp:element, key:'click'})); //create a new arr with the metronome clicks mapped with key and timestamp
+    this.lastStep = toLoop.pop(); //save aside the last (eg fifth) metronome click
+    let loopConcat=toLoop.concat(sequenceFiltered); //concatenate metronome clicks and drummachine key pressings
+    loopConcat.sort((a, b) => a.timeStamp - b.timeStamp); //sort by timestamp
 
     this.setState({
       recording:true,
@@ -607,6 +606,8 @@ class Looper extends Component {
   }
 }
 
+/*  LooperButton
+*/
 class LooperButton extends Component{
   constructor(props){
     super(props);
@@ -643,6 +644,58 @@ class LooperButton extends Component{
 }
 
 
+
+class PageHeader extends Component{
+   constructor(props){
+    super(props);
+    this.state = {
+      helpVisibility:false
+    }
+    this.styleVisibility=this.styleVisibility.bind(this);
+    this.showHelp=this.showHelp.bind(this);
+  }
+
+  styleVisibility(){
+    if(this.state.helpVisibility===false){
+      return({display:'none'});
+    }
+    return({display:'block'});
+  }
+
+  showHelp(){
+    this.state.helpVisibility===true ?
+      this.setState({
+        helpVisibility:false
+      }) :
+      this.setState({
+        helpVisibility:true
+      })
+    }
+
+  render(){ 
+  const text=`
+  This is a simple drum pattern recorder for people who practice a music instrument. 
+  The first pad holds the drum keys.
+  The middle pad is a standard metronome. 
+  The last pad loops the last specified number of bars. The recording happens in combination with metronome clicks: for record eg 4 bars you have to start metronome, play drumpads for 4 bars, wait for the fifth metronome click then stop metronome. The small led in the upper-right indicates looping: if is on but there is no sound means that the recording is splitted (eg 2 bars, then a long pause, then the last 2 bars): just press "Stop looping" and record again.  
+
+  `;
+    return(
+      <div className="page-header">
+        <div className="title-section">
+          <FontAwesomeIcon onClick={this.showHelp} className="fa-icon" icon={faQuestionCircle}/>
+          <div className="page-title"><h1>Drums looper</h1></div>
+          <div/>{/*fake div for fill the grid*/}
+        </div>
+        <div className="help-section" style={this.styleVisibility()}>
+          {text}
+        </div>
+      </div>
+    )
+  }
+
+
+}
 
 
 export default App;

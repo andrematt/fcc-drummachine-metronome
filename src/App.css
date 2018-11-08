@@ -2,11 +2,29 @@ html {
   background-color: #333333;
 }
 
+.page-header .title-section {
+  color: #CCCCCC;
+  text-align: center;
+  display: grid;
+  grid-template-columns: 1fr 10fr 1fr;
+  align-items: center;
+}
+.page-header .title-section .fa-icon {
+  margin-left: 4%;
+  font-size: 30px;
+}
+.page-header .help-section {
+  margin: auto;
+  padding: 5px;
+  background-color: #fff;
+  width: 95%;
+}
+
 .box {
   position: relative;
   margin: auto;
   display: flex;
-  margin-top: 8%;
+  margin-top: 3%;
   width: 800px;
   height: 420px;
   background: none;
