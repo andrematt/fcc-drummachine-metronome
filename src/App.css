@@ -100,8 +100,9 @@ html {
   align-items: center;
 }
 .box .keypad-container .footer .slidecontainer {
-  margin: 0 auto 0 auto;
   width: 60%;
+  display: flex;
+  margin: 0 auto 0 auto;
 }
 .box .keypad-container .footer .slidecontainer input[type=range] {
   width: 100%;
@@ -181,7 +182,8 @@ html {
   width: 100%;
 }
 .box .metronome-container .footer .slidecontainer {
-  width: 60%;
+  width: 80%;
+  display: flex;
   margin: 0 auto 0 auto;
 }
 .box .metronome-container .footer .slidecontainer #metronome-slider {
@@ -253,7 +255,13 @@ html {
   display: flex;
   align-items: center;
 }
-.box .looper-container .volume-section input {
+.box .looper-container .volume-section .slidecontainer {
+  width: 80%;
+  display: flex;
+  margin: 0 auto 0 auto;
+}
+.box .looper-container .volume-section .slidecontainer input {
+  width: 100%;
   margin: 0 auto 0 auto;
   margin: auto;
 }
@@ -275,6 +283,9 @@ html {
   }
   .box .keypad-container .keypad-screen {
     font-size: 14px;
+  }
+  .box .keypad-container .footer .slidecontainer {
+    width: 80%;
   }
   .box .metronome-container {
     width: 95%;

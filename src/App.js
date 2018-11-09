@@ -620,7 +620,9 @@ class Looper extends Component {
           <LooperButton clickFunct={this.props.increaseBarsToLoop} buttonText={"+"} id="increase-loop-button"/>
         </div>
         <div className="volume-section">
-          <input id="looper-slider" type="range" min="0" max="1" step="0.01" value={this.state.volume} onChange={this.updateVolumeLoop} />
+          <div className="slidecontainer">
+            <input id="looper-slider" type="range" min="0" max="1" step="0.01" value={this.state.volume} onChange={this.updateVolumeLoop} />
+          </div>
         </div>
       </div>
     )
@@ -695,11 +697,12 @@ class PageHeader extends Component{
 
   render(){ 
   const text=`
-  This is a simple drum pattern recorder for people who practice a music instrument. 
-  The first pad holds the drum keys.
-  The middle pad is a standard metronome. 
-  The last pad loops the last specified number of bars. The recording happens in combination with metronome clicks: for record eg 4 bars you have to start metronome, play drumpads for 4 bars, wait for the fifth metronome click then stop metronome (with mouse button, 'P' key, or spacebar). The small led in the upper-right indicates looping: if is on but there is no sound means that the recording is splitted (eg 2 bars, then a long pause, then the last 2 bars): just press "Stop looping" and record again.  
-
+  <p>
+  This is a simple drum pattern recorder for who practice a music instrument.<br> 
+  The first pad holds the drum keys, the middle pad is a standard metronome and the last pad loops the last specified number of bars. <br>
+  The recording happens in combination with metronome clicks: for record eg. 4 bars you have to start metronome, play drumpads for 4 bars, wait for the fifth metronome click then stop metronome (with mouse button, 'P' key, or spacebar).
+  The small led in the upper-right indicates looping: if is on but there is no sound means that the recording is splitted (eg. 2 bars, then a long pause, then the last 2 bars): just press "Stop looping" and record again.  
+  </p>
   `;
     return(
       <div className="page-header">
@@ -708,8 +711,8 @@ class PageHeader extends Component{
           <div className="page-title"><h1>Drums looper</h1></div>
           <div/>{/*fake div for fill the grid*/}
         </div>
-        <div className="help-section" style={this.styleVisibility()}>
-          {text}
+        <div className="help-section" style={this.styleVisibility()} dangerouslySetInnerHTML={{__html: text}}>
+          
         </div>
       </div>
     )

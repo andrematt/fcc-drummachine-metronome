@@ -119,8 +119,9 @@ html{
     display:flex;
     align-items:center;
 	  .slidecontainer{
-      margin:0 auto 0 auto;
 	    width:60%;
+      display:flex;
+      margin:0 auto 0 auto;
       input[type=range]{
         width:100%;
       }
@@ -216,7 +217,8 @@ html{
     width:100%;
    
    .slidecontainer{
-      width:60%;
+      width:80%;
+      display:flex;
       margin:0 auto 0 auto;
       #metronome-slider{
         width:100%;
@@ -296,10 +298,15 @@ html{
     background-color:$lightGray;
     display:flex;
     align-items:center;
-    input{
-      margin:0 auto 0 auto; margin:auto;
+    .slidecontainer{
+      width:80%;
+      display:flex;
+      margin:0 auto 0 auto;
+      input{
+        width:100%;
+        margin:0 auto 0 auto; margin:auto;
+      }
     }
-
   }
 
 
@@ -327,9 +334,15 @@ html{
       .keypad-screen{
         font-size:14px;
       }
+      .footer{
+        .slidecontainer{
+        width:80%;
+        }
+      }
     }
 
-   .metronome-container{
+
+    .metronome-container{
       width: 95%;
       height:30%;
     }
