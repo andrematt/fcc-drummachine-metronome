@@ -307,7 +307,7 @@ class Metronome extends Component {
    	this.minusTen=this.minusTen.bind(this);
   }
 
- 
+
   handleTimer(){
  	this.timerInUse ?
  	  this.timerStop():
@@ -432,6 +432,8 @@ class MetronomePad extends Component {
 }
 
 /*  MetronomeButton
+ *  Add to the components the function passed by the parent component
+ *  Add to the start/stop button a listener for the "P" key
 */
 class MetronomeButton extends Component {
 	constructor(props){
@@ -442,7 +444,26 @@ class MetronomeButton extends Component {
 		this.assignIcon=this.assignIcon.bind(this);
 		this.clickFunct = this.clickFunct.bind(this);
 	  this.buttonPress = this.buttonPress.bind(this);
-	}
+    this.handlePausePress=this.handlePausePress.bind(this);
+  }
+
+  handlePausePress(key){ //need a faster way to start/stop metronome than mouse click 
+    if (key.keyCode === 80) {
+      this.clickFunct();
+    }
+  }
+
+  componentWillMount() {
+    if(this.props.id==="button-center") { //add a keyboard listener only to the start/pause button
+      document.addEventListener('keydown', this.handlePausePress);
+    }
+  }
+  
+  componentWillUnmount() {
+    if(this.props.id==="button-center") {
+      document.removeEventListener('keydown', this.handlePausePress);
+    }
+  }
 
   buttonPress(){  
     this.state.buttonStyle.backgroundColor === 'orange' ?
@@ -624,7 +645,7 @@ class LooperButton extends Component{
         buttonStyle: {backgroundColor:'buttonface'}
       }) :
       this.setState({
-            buttonStyle:  {backgroundColor:'orange', borderStyle: 'inset'}
+        buttonStyle:  {backgroundColor:'orange', borderStyle: 'inset'}
       });
   }
 
@@ -677,7 +698,7 @@ class PageHeader extends Component{
   This is a simple drum pattern recorder for people who practice a music instrument. 
   The first pad holds the drum keys.
   The middle pad is a standard metronome. 
-  The last pad loops the last specified number of bars. The recording happens in combination with metronome clicks: for record eg 4 bars you have to start metronome, play drumpads for 4 bars, wait for the fifth metronome click then stop metronome. The small led in the upper-right indicates looping: if is on but there is no sound means that the recording is splitted (eg 2 bars, then a long pause, then the last 2 bars): just press "Stop looping" and record again.  
+  The last pad loops the last specified number of bars. The recording happens in combination with metronome clicks: for record eg 4 bars you have to start metronome, play drumpads for 4 bars, wait for the fifth metronome click then stop metronome (with mouse button, 'P' key, or spacebar). The small led in the upper-right indicates looping: if is on but there is no sound means that the recording is splitted (eg 2 bars, then a long pause, then the last 2 bars): just press "Stop looping" and record again.  
 
   `;
     return(
